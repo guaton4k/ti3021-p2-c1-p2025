@@ -56,3 +56,50 @@ def create_persona(rut, nombres, apellidos, fecha_nacimiento, cod_area, numero_t
         conn.commit()
     print(f"Persona con RUT={rut} creada.")
 
+def create_schema(query):
+    try:
+        with get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query)
+                print(f"Tabla creada \n {query}")
+            conn.commit()
+    except oracledb.DatabaseError as e:
+        err = e
+        print(f"No se pudo crear la tabla: {err} \n {query}")
+
+tables = [
+    (
+        "CREATE TABLE personas ("
+        "id INTEGER PRIMARY KEY,"
+        "rut NUMBER(8),"
+        "nombres VARCHAR(64),"
+        "apellidos VARCHAR(64),"
+        "fecha_nacimiento DATE"
+        ")"
+    ),
+    (
+        "CREATE TABLE departamentos ("
+        "id INTEGER PRIMARY KEY,"
+        "nombre VARCHAR(32),"
+        "fecha_creacion DATE"
+        ")"
+    ),
+    (
+        "CREATE TABLE empleados ("
+        "id INTEGER PRIMARY KEY,"
+        "sueldo NUMBER(10,2),"
+        "idPersona INTEGER,"
+        "idDepartamento INTEGER,"
+        "FOREIGN KEY (idPersona) REFERENCES PERSONAS(id),"
+        "FOREIGN KEY (idDepartamento) REFERENCES DEPARTAMENTOS(id)"
+        ")"
+    )
+]
+
+for query in tables:
+    create_schema(query)
+
+def create_personas(rut, nombre, apellido, fecha_nacimiento, telefono, email):
+    sql = (
+        "insert into personas (rut, nombre, apellido, fecha_nacimiento, telefono)"
+    )
